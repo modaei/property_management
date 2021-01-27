@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'corsheaders',
     'accounts',
+    'geography',
+    'property',
 ]
 
 MIDDLEWARE = [
