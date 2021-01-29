@@ -2,9 +2,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from ..models import Country, City
 from .serializers import CountrySerializer, CitySerializer
-from django_filters.rest_framework import (DjangoFilterBackend,
-                                           FilterSet,
-                                           CharFilter)
+from django_filters.rest_framework import (DjangoFilterBackend, FilterSet, CharFilter)
 
 
 class CountryListAPIView(ListAPIView):

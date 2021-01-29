@@ -5,7 +5,7 @@ from ..models import Country, City
 class CountrySerializer(ModelSerializer):
     class Meta:
         model = Country
-        fields = ['id', 'code', 'title', ]
+        fields = ['id', 'code', 'name', ]
 
 
 class CitySerializer(ModelSerializer):
@@ -13,4 +13,4 @@ class CitySerializer(ModelSerializer):
 
     class Meta:
         model = City
-        fields = ['id', 'country', 'title', ]
+        fields = ['id', 'country', 'name', ]

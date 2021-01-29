@@ -6,7 +6,7 @@ from decimal import Decimal
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open('extra/worldcities.csv') as csv_file:
+        with open('docs/worldcities.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
@@ -18,9 +18,9 @@ class Command(BaseCommand):
                     if qs.exists():
                         country = qs.first()
                     else:
-                        country = Country.objects.create(title=row[3], code=row[4])
+                        country = Country.objects.create(name=row[3], code=row[4])
                     City.objects.create(
-                        title=row[0],
+                        name=row[0],
                         country=country,
                         latitude=Decimal(row[1]),
                         longitude=Decimal(row[2]),

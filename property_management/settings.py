@@ -42,9 +42,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
     'corsheaders',
+    'easy_thumbnails',
     'accounts',
     'geography',
-    'property',
+    'properties',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'property_management.middlewares.JWTMiddleware'
 ]
 
 ROOT_URLCONF = 'property_management.urls'
@@ -135,6 +137,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
 AUTH_USER_MODEL = 'accounts.User'
 
 SITE_NAME = 'Property Management'
@@ -176,6 +181,10 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(days=10),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=30),
 }
+
+THUMBNAIL_BASEDIR = 'thumbs'
+THUMBNAIL_NAMER = 'easy_thumbnails.namers.hashed'
+THUMBNAIL_DEFAULT_OPTIONS = {'size': (150, 100), 'quality': 85, 'autocrop': True}
 
 DB_PREFIX = "xma_"
 

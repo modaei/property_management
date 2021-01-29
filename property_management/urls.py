@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import media_access
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('media/<str:path>/', media_access, name='media'),
+
     path('api/accounts/', include('accounts.api.urls')),
     path('api/geography/', include('geography.api.urls')),
-    # path('api/property/', include('property.api.urls')),
+    path('api/properties/', include('properties.api.urls')),
 ]
