@@ -19,7 +19,8 @@ from .views import media_access
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('media/<str:path>/', media_access, name='media'),
+    path('media/<str:filename>/', media_access, name='media'),
+    path('media/<str:media_type>/<str:filename>/', media_access, name='media'),
 
     path('api/accounts/', include('accounts.api.urls')),
     path('api/geography/', include('geography.api.urls')),

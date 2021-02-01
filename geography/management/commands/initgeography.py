@@ -14,10 +14,8 @@ class Command(BaseCommand):
                     self.stdout.write(f'Column names are {", ".join(row)}')
                     line_count += 1
                 else:
-                    qs = Country.objects.filter(code=row[4])
-                    if qs.exists():
-                        country = qs.first()
-                    else:
+                    country = Country.objects.filter(code=row[4]).first()
+                    if country is None:
                         country = Country.objects.create(name=row[3], code=row[4])
                     City.objects.create(
                         name=row[0],

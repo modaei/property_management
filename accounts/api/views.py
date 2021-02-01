@@ -152,10 +152,9 @@ class ConfirmValidationTokenView(UpdateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             token_str = serializer.validated_data.get('token')
-            qs = ValidationToken.objects.filter(user=user_obj).filter(token=token_str)
-            if not qs.exists():
+            token_obj = ValidationToken.objects.filter(user=user_obj).filter(token=token_str).first()
+            if token_obj is None:
                 return Response({'token': ['Invalid token.']}, status=status.HTTP_404_NOT_FOUND)
-            token_obj = qs.first()
             if token_obj.is_expired:
                 return Response({'token': ['Expired token.']}, status=status.HTTP_404_NOT_FOUND)
             if token_obj.validation_type == 'email':

@@ -4,6 +4,7 @@ from rest_framework.serializers import (ModelSerializer, SerializerMethodField, 
 from ..models import Property, Photo
 from django.core.files.images import get_image_dimensions
 from geography.api.serializers import CitySerializer
+from rest_framework.exceptions import NotFound
 
 
 # This field is able to receive an empty string for an integer field and turn it into a None number
@@ -32,13 +33,12 @@ class PropertySerializer(ModelSerializer):
 
 
 class PhotoSerializer(ModelSerializer):
-    object_type = CharField(required=True)
-    slug = CharField(required=True)
-    is_thumbnail = BooleanField(required=False)
+    property_id = IntegerField(required=True)
+    is_thumbnail = BooleanField(required=True)
 
     class Meta:
         model = Photo
-        fields = ['image', 'slug', 'is_thumbnail']
+        fields = ['image', 'property_id', 'is_thumbnail']
 
     def validate_image(self, value):
         width, height = get_image_dimensions(value)
@@ -48,12 +48,15 @@ class PhotoSerializer(ModelSerializer):
             raise ValidationError('File size should be smaller than 2MB.')
         return value
 
-    def validate(self, attrs):
-        qs = Property.objects.filter(slug=attrs['slug'])
-
+    def validate_property_id(self, value):
+        qs = Property.objects.filter(id=value)
         if qs is None or not qs.exists():
-            raise ValidationError('Specified object does not exist.')
-        photos = qs.first().photos.all()
-        if len(photos) >= 6:
-            raise ValidationError('Maximum number of images are already uploaded.')
+            raise NotFound()
+        return value
+
+    def validate(self, attrs):
+        property_obj = Property.objects.filter(id=attrs['property_id']).first()
+        if property_obj is not None:
+            if len(property_obj.photos.all()) > 20:
+                raise ValidationError('Maximum number of images has already been uploaded.')
         return attrs
