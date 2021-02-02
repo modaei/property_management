@@ -1,10 +1,11 @@
-from rest_framework.relations import HyperlinkedRelatedField, StringRelatedField
-from rest_framework.serializers import (ModelSerializer, SerializerMethodField, CharField, ValidationError,
+from rest_framework.relations import StringRelatedField
+from rest_framework.serializers import (ModelSerializer, SerializerMethodField, ValidationError,
                                         BooleanField, IntegerField)
 from ..models import Property, Photo
 from django.core.files.images import get_image_dimensions
 from geography.api.serializers import CitySerializer
 from rest_framework.exceptions import NotFound
+from easy_thumbnails.files import get_thumbnailer
 
 
 # This field is able to receive an empty string for an integer field and turn it into a None number
@@ -18,11 +19,12 @@ class BlankableIntegerField(IntegerField):
 class PropertySerializer(ModelSerializer):
     photos = StringRelatedField(many=True, read_only=True)
     create_date = SerializerMethodField()
+    thumbnail = SerializerMethodField()
 
     class Meta:
         model = Property
-        fields = ['id', 'city', 'name', 'description', 'create_date', 'thumbnail_image', 'photos']
-        read_only_fields = ['id', 'create_date', 'photos', 'thumbnail_image']
+        fields = ['id', 'city', 'name', 'description', 'create_date', 'thumbnail', 'photos']
+        read_only_fields = ['id', 'create_date', 'photos', 'thumbnail']
 
     def to_representation(self, instance):
         self.fields['city'] = CitySerializer()
@@ -30,6 +32,12 @@ class PropertySerializer(ModelSerializer):
 
     def get_create_date(self, obj):
         return int(obj.create_date.timestamp())
+
+    def get_thumbnail(self, obj):
+        thumb_photo = obj.thumbnail_photo
+        if thumb_photo is None:
+            return None
+        return get_thumbnailer(thumb_photo.image).get_thumbnail({}).url
 
 
 class PhotoSerializer(ModelSerializer):

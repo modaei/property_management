@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from easy_thumbnails.files import get_thumbnailer
 from geography.models import Country, City
+import ntpath
 
 
 class Property(models.Model):
@@ -16,7 +17,7 @@ class Property(models.Model):
     address = models.TextField(blank=True, null=True)
     create_date = models.DateTimeField(auto_now=False, auto_now_add=True, verbose_name="Created")
     update_date = models.DateTimeField(auto_now=True, auto_now_add=False, verbose_name="Last updated")
-    thumbnail_image = models.CharField(null=True, blank=True, max_length=300)
+    thumbnail_image = models.CharField(null=True, blank=True, max_length=300, db_index=True)
 
     @property
     def thumbnail_photo(self):
@@ -34,7 +35,7 @@ class Property(models.Model):
             thumb_photo.save()
 
         # Now create the thumbnail and save its path is the property object
-        self.thumbnail_image = get_thumbnailer(photo.image).get_thumbnail({}).url
+        self.thumbnail_image = ntpath.basename( get_thumbnailer(photo.image).get_thumbnail({}).file.name)
         self.save()
 
         photo.is_thumbnail = True
