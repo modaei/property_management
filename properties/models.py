@@ -10,7 +10,7 @@ class Property(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, on_delete=models.PROTECT)
     city = models.ForeignKey(City, blank=True, null=True, on_delete=models.PROTECT)
     name = models.CharField(blank=False, null=False, max_length=30, db_index=True)
-    description = models.TextField(blank=False, null=False, max_length=1000)
+    description = models.TextField(blank=True, null=True, max_length=1000)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True)
     area = models.DecimalField(max_digits=7, decimal_places=2, null=True)

@@ -8,7 +8,6 @@ virtualenv -p python3.7 env
 source env/bin/activate
 pip install gunicorn
 pip install -r requirements.txt
-django-admin startproject property_management .
 vi property_management/settings.py
 	import os
 	ALLOWED_HOSTS = ['property.test']
@@ -16,8 +15,10 @@ vi property_management/settings.py
 python manage.py makemigrations
 python manage.py migrate
 python manage.py collectstatic
-python manage.py runserver 0.0.0.0:8000
-gunicorn --bind 0.0.0.0:8000 property_management.wsgi
+mkdir protected/
+mkdir protected/media/
+python manage.py runserver 0.0.0.0:8000     # Check in browser
+gunicorn --bind 0.0.0.0:8000 property_management.wsgi     # Check in browser
 deactivate
 chown www-data /opt/property_management/
 vi /etc/systemd/system/property-management.service
@@ -29,7 +30,7 @@ vi /etc/systemd/system/property-management.service
 	User=www-data
 	Group=www-data
 	WorkingDirectory=/opt/property_management
-	ExecStart=/opt/property_management/env/bin/gunicorn --access-logfile - --workers 3 [--reload (just for development env)] --bind unix:/opt/property_management/property_management.sock property_management.wsgi:application
+	ExecStart=/opt/property_management/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/opt/property_management/property_management.sock property_management.wsgi:application
 
 	[Install]
 	WantedBy=multi-user.target
@@ -40,19 +41,26 @@ systemctl status property-management
 systemctl enable property-management
 vi /etc/nginx/sites-available/property.test
 	server {
-		listen 80;
-		server_name property.test;
+        listen 80;
+        server_name property.local;
 
-		location = /favicon.ico { access_log off; log_not_found off; }
-		location /static/ {
-			root /opt/property_management;
-		}
+        location = /favicon.ico { access_log off; log_not_found off; }
 
-		location / {
-			include proxy_params;
-			proxy_pass http://unix:/opt/property_management/property_management.sock;
-		}
-	}
+        location /static/ {
+            root /opt/property_management;
+        }
+
+        location /protected/ {
+            internal;
+            root /opt/property_management;
+        }
+
+        location / {
+            include proxy_params;
+            proxy_pass http://unix:/opt/property_management/property_management.sock;
+        }
+    }
+
 
 sudo ln -s /etc/nginx/sites-available/property.test /etc/nginx/sites-enabled/
 systemctl restart nginx

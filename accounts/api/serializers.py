@@ -8,10 +8,11 @@ User = get_user_model()
 
 class UserCreateSerializer(ModelSerializer):
     email = EmailField(label='Email address')  # This makes email field required!
+    repeat_password = CharField(required=True, write_only=True)
 
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['email', 'password', 'repeat_password']
         extra_kwargs = {"password": {"write_only": True}, }
 
     def validate_email(self, value):
@@ -23,6 +24,11 @@ class UserCreateSerializer(ModelSerializer):
     def validate_password(self, value):
         validate_password(value)
         return value
+
+    def validate_repeat_password(self, value):
+        password = self.initial_data.get("password")
+        if password != value:
+            raise ValidationError("This field may not be different from password.")
 
     def create(self, validated_data):
         user = User(
