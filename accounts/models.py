@@ -75,7 +75,10 @@ class User(AbstractBaseUser):
 
     @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        if self.first_name or self.last_name:
+            return f'{self.first_name} {self.last_name}'
+        else:
+            return None
 
     @property
     def is_active(self):

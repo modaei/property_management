@@ -1,28 +1,21 @@
-"""property_management URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from .views import media_access
 
 urlpatterns = [
+    # Django Admin console.
     path('admin/', admin.site.urls),
+
+    # Media files serving and access management
     path('media/<str:filename>/', media_access, name='media'),
     path('media/<str:media_type>/<str:filename>/', media_access, name='media'),
 
+    # APIs for user accounts management.
     path('api/accounts/', include('accounts.api.urls')),
+
+    # APIs for accessing geographical data such as world countries and cities.
     path('api/geography/', include('geography.api.urls')),
+
+    # APIs for managing properties
     path('api/properties/', include('properties.api.urls')),
 ]

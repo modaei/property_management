@@ -5,8 +5,7 @@ from rest_framework.parsers import MultiPartParser
 from .serializers import (PropertySerializer, PhotoSerializer, )
 from ..models import Property, Photo
 from rest_framework import status
-from .permissions import IsPropertyOwnerOrReadOnly, IsPropertyOwner
-from easy_thumbnails.files import get_thumbnailer
+from .permissions import IsPropertyOwner
 from django.core.files.storage import default_storage
 from .paginations import PropertyPagePagination
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet, BooleanFilter, DateTimeFromToRangeFilter,
@@ -15,6 +14,10 @@ from rest_framework.filters import OrderingFilter
 from django.db.models import Count
 
 
+# Filter set class for searching in properties
+# it can filter based on property name(q), city,
+# create_date or the ones that have at least
+# one photo
 class PropertyFilter(FilterSet):
     q = CharFilter(field_name='name', lookup_expr='icontains')
     create_date = DateTimeFromToRangeFilter()
@@ -31,6 +34,7 @@ class PropertyFilter(FilterSet):
         fields = ['q', 'name', 'city', 'has_photo', 'create_date']
 
 
+# View class for listing, searching and creating properties.
 class PropertyListCreateAPIView(ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = PropertyFilter
@@ -40,9 +44,11 @@ class PropertyListCreateAPIView(ListCreateAPIView):
     serializer_class = PropertySerializer
     pagination_class = PropertyPagePagination
 
+    # Just show the properties that the user owns.
     def get_queryset(self):
         return Property.objects.filter(user=self.request.user)
 
+    # Set the owner of the property before creating it.
     def perform_create(self, serializer):
         if serializer.is_valid():
             serializer.save(user=self.request.user)
@@ -54,14 +60,18 @@ class PropertyRetrieveUpdateAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Property.objects.all()
 
 
+# View for uploading and deleting property photos.
+# Also setting a photo as thumbnail.
 class MediaManagerAPIView(GenericAPIView):
-    # TODO: uncomment permission
-    # permission_classes = [IsAuthenticated, IsPropertyOwner]
+    permission_classes = [IsAuthenticated, IsPropertyOwner]
     serializer_class = PhotoSerializer
     parser_classes = (MultiPartParser,)
 
+    # Upload new property photo.
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        # First find the related property object, then check the user permission,
+        # if all passes, then assign the new photo to the property
         if serializer.is_valid():
             validated_data = serializer.validated_data
             serializer_data = serializer.data
@@ -77,11 +87,13 @@ class MediaManagerAPIView(GenericAPIView):
             return Response(serializer_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    # Delete an existing photo of a property
     def delete(self, request, *args, **kwargs):
         filename = self.kwargs.get('filename')
         if not filename:
             return Response('filename not specified', status=status.HTTP_400_BAD_REQUEST)
 
+        # Check user's permission. If the user is authorized, check if the photo is set as thumbnail.
         photo = Photo.objects.filter(image=filename).first()
         if photo is not None:
             property_ob = photo.property
@@ -89,6 +101,8 @@ class MediaManagerAPIView(GenericAPIView):
             if property_ob.thumbnail_photo == photo:
                 return Response('Image is selected as thumbnail. Please select another image as thumbnail.',
                                 status=status.HTTP_400_BAD_REQUEST)
+
+            # Try deleting the related file. Whether successful or not, delete the photo object.
             try:
                 img_file = photo.image.file.name
                 photo.image = None
@@ -100,13 +114,13 @@ class MediaManagerAPIView(GenericAPIView):
         return Response('object not found', status=status.HTTP_404_NOT_FOUND)
 
     # Sets the specified photo as thumbnail
-    # Sets the specified photo as thumbnail
     def put(self, request, *args, **kwargs):
         filename = self.kwargs.get('filename')
         if not filename:
             return Response('Filename not specified.', status=status.HTTP_400_BAD_REQUEST)
 
         photo = Photo.objects.filter(image=filename).first()
+        # Using the setter defined in the model, sets the property's thumbnail photo.
         if photo is not None:
             property_ob = photo.property
             self.check_object_permissions(request, property_ob)

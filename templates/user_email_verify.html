@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p>
+    {% if full_name %}
+        Dear <strong>{{ full_name }}</strong>
+    {% else %}
+        Dear User
+    {% endif %}
+</p>
+
+<p>
+    To verify your email address, please click on the following link: <br>
+    {{ verify_email_url }}
+</p>
+</body>
+</html>

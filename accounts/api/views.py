@@ -96,7 +96,7 @@ class RequestValidationTokenView(UpdateAPIView):
                         'to': user_obj.email,
                     }
                     try:
-                        send_mail(context, 'accounts/email/user_verify_email')
+                        send_mail(context, 'user_email_verify')
                     except SMTPException:
                         return Response({'non_field_errors': ['error while sending verification email']},
                                         status=status.HTTP_404_NOT_FOUND)
@@ -180,7 +180,7 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
         'site_name': settings.SITE_NAME
     }
     try:
-        send_mail(context, 'accounts/email/user_reset_password')
+        send_mail(context, 'user_reset_password')
     except SMTPException:  # Does not work because rest_reset_password library is used !!!
         return Response({'non_field_errors': ['Error while sending password reset email.']},
                         status=status.HTTP_404_NOT_FOUND)
@@ -196,7 +196,6 @@ def send_mail(context, template):
         email_plaintext_message,
         # from:
         f'noreply@{settings.SITE_DOMAIN}',
-        # "myapp1364@gmail.com",
         # to:
         [context['to']]
     )

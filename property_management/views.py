@@ -1,9 +1,9 @@
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden, HttpResponseNotFound
-
 from properties.models import Photo, Property
 
-
+# This view is NOT a part of the REST API. It is used for
+#  serving and access management of property media files.
 def media_access(request, media_type='photo', filename=None):
     user = request.user
 
@@ -14,7 +14,7 @@ def media_access(request, media_type='photo', filename=None):
         access = True
     else:
         access = False
-        # For photos, find the related Photo and then Property objects. If property is not none and it
+        # For photos, find the related Photo object and then the Property object. If property is not none and it
         # belongs to the same user, grant access
         if media_type == 'photo':
             photo = Photo.objects.filter(image=filename).first()
@@ -28,6 +28,7 @@ def media_access(request, media_type='photo', filename=None):
         else:
             return HttpResponseNotFound()
 
+    # If access is granted redirect to the proper internal url, otherwise return forbidden response.
     # Photos are stored directly in the media folder, but thumbnails are in thumbs sub folder
     if access:
         if media_type == 'photo':

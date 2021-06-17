@@ -14,7 +14,7 @@ SECRET_KEY = '=k_j6vpw996^4^1&kfz4o5l*03vjjkrn_t^=r9-o0jlzzl@ogx'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['property.test', 'property.local', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['property.test', 'property.local', 'localhost', '127.0.0.1', '75.151.86.68']
 
 # Application definition
 
@@ -53,7 +53,7 @@ ROOT_URLCONF = 'property_management.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,14 +70,13 @@ WSGI_APPLICATION = 'property_management.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'property_management',
         'USER': 'property_management',
         'PASSWORD': 'h59MQp@@Z$lxpWn4',
-        'HOST': 'server.test',
+        'HOST': '127.0.0.1',
         'PORT': 3308,
         'OPTIONS': {
             'charset': 'utf8',
@@ -122,14 +121,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+# Static and media files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'protected/media/')
 
+# User Model
 AUTH_USER_MODEL = 'accounts.User'
 
+# Static URLs and names
 SITE_NAME = 'Property Management'
 SITE_DOMAIN = 'property.test'
 
@@ -139,7 +141,8 @@ VERIFY_EMAIL_URL = 'http://property.test:3000/confirmation/'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata'
 }
 
 SIMPLE_JWT = {
@@ -170,26 +173,29 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=30),
 }
 
+# Thumbnailer settings
 THUMBNAIL_BASEDIR = 'thumbs'
 THUMBNAIL_NAMER = 'easy_thumbnails.namers.hashed'
 THUMBNAIL_DEFAULT_OPTIONS = {'size': (150, 100), 'quality': 85, 'autocrop': True}
 
 DB_PREFIX = "xma_"
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS settings.
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = [
+    ]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:8080",
-#     "http://127.0.0.1:3000",
-#     "http://192.168.7.23:3000",
-#     "http://192.168.7.22:3000",
-#     "http://192.168.7.23:8080",
-#     "http://192.168.7.23:8081",
-# ]
-
+# Email sending settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'myapp1364@gmail.com'
-EMAIL_HOST_PASSWORD = 'zaq1!QAZ@WSX'
+EMAIL_HOST = 'localhost'
+EMAIL_USE_TLS = False
+
+# Photo settings
+IMAGE_MIN_WIDTH = 400
+IMAGE_MIN_HEIGHT = 400
+IMAGE_MAX_SIZE = 2 * 1024 * 1024
+
+# Number of images allowed for a property
+PROPERTY_MAX_IMAGES = 20
