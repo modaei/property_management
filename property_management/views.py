@@ -2,9 +2,12 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden, HttpResponseNotFound
 from properties.models import Photo, Property
 
-# This view is NOT a part of the REST API. It is used for
-#  serving and access management of property media files.
+
 def media_access(request, media_type='photo', filename=None):
+    """
+    This view is NOT a part of the REST API. It is used for
+    serving and access management of property media files.
+    """
     user = request.user
 
     if user.is_anonymous:

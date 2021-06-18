@@ -5,6 +5,10 @@ from decimal import Decimal
 
 
 class Command(BaseCommand):
+    """
+    Console commands to import city and country information from
+    the CSV file to the database.
+    """
     def handle(self, *args, **options):
         with open('docs/worldcities.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')

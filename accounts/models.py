@@ -3,9 +3,13 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from .validators import validate_phone_number, validate_names
+from django.conf import settings
 
 
 class UserManager(BaseUserManager):
+    """
+    Manager class for the custom User class.
+    """
     def create_user(self, email, phone_number, password=None, is_active=True, is_staff=False,
                     is_admin=False):
         user_obj = self.model(
@@ -40,6 +44,10 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    """
+    Custom User class tailored for this application. For example Username
+    field is email address and a few other fields are added.
+    """
     email = models.EmailField(unique=True, blank=False, null=False, db_index=True)
     active = models.BooleanField(default=True)  # Can login
     staff = models.BooleanField(default=False)  # Staff members
@@ -57,43 +65,57 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
 
+    #
     def save(self, *args, **kwargs):
+        """
+        If user's phone number is changed, it will not be verified anymore.
+        """
         old = type(self).objects.get(pk=self.pk) if self.pk else None
         if old and old.phone_number != self.phone_number:
             self.phone_number_verified = False
         super(User, self).save(*args, **kwargs)
 
-    def has_perm(self, perm, obj=None):
-        return True
 
-    def has_module_perms(self, app_label):
-        return True
+def has_perm(self, perm, obj=None):
+    return True
 
-    @property
-    def short_name(self):
-        return self.first_name
 
-    @property
-    def full_name(self):
-        if self.first_name or self.last_name:
-            return f'{self.first_name} {self.last_name}'
-        else:
-            return None
+def has_module_perms(self, app_label):
+    return True
 
-    @property
-    def is_active(self):
-        return self.active
 
-    @property
-    def is_staff(self):
-        return self.staff
+@property
+def short_name(self):
+    return self.first_name
 
-    @property
-    def is_admin(self):
-        return self.admin
+
+@property
+def full_name(self):
+    if self.first_name or self.last_name:
+        return f'{self.first_name} {self.last_name}'
+    else:
+        return None
+
+
+@property
+def is_active(self):
+    return self.active
+
+
+@property
+def is_staff(self):
+    return self.staff
+
+
+@property
+def is_admin(self):
+    return self.admin
 
 
 class ValidationToken(models.Model):
+    """
+    Represents tokens which are used to validate user email addresses and phone numbers.
+    """
     VALIDATION_TYPES = (
         ('email', 'email'),
         ('phone', 'phone')
@@ -109,6 +131,6 @@ class ValidationToken(models.Model):
     @property
     def is_expired(self):
         if self.validation_type == 'email':
-            return self.create_date + self.EMAIL_EXPIRY_INTERVAL < timezone.now()
+            return self.create_date + timedelta(minutes=settings.VALIDATION_TOKEN_EMAIL_EXPIRY) < timezone.now()
         elif self.validation_type == 'phone':
-            return self.create_date + self.PHONE_EXPIRY_INTERVAL < timezone.now()
+            return self.create_date + timedelta(minutes=settings.VALIDATION_TOKEN_PHONE_EXPIRY) < timezone.now()

@@ -5,8 +5,10 @@ from geography.models import City
 import ntpath
 
 
-# Represents a real estate property.
 class Property(models.Model):
+    """
+    Represents a real estate property.
+    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, on_delete=models.PROTECT)
     city = models.ForeignKey(City, blank=True, null=True, on_delete=models.PROTECT)
     name = models.CharField(blank=False, null=False, max_length=30, db_index=True)
@@ -19,14 +21,18 @@ class Property(models.Model):
     update_date = models.DateTimeField(auto_now=True, auto_now_add=False, verbose_name="Last updated")
     thumbnail_image = models.CharField(null=True, blank=True, max_length=300, db_index=True)
 
-    # This property is used to return property's thumbnail image.
     @property
     def thumbnail_photo(self):
+        """
+        This property is used to return property's thumbnail image.
+        """
         return self.photos.filter(is_thumbnail=True).first()
 
-    # Setter for updating the thumbnail photo of a property.
     @thumbnail_photo.setter
     def thumbnail_photo(self, photo):
+        """
+        Setter for updating the thumbnail photo of a property.
+        """
         # If the property already has a thumbnail, remove it and mark the related photo as not thumbnail.
         if self.thumbnail_photo:
             thumbnailer = get_thumbnailer(self.thumbnail_photo.image)
@@ -49,8 +55,10 @@ class Property(models.Model):
         return self.name
 
 
-# Represents an uploaded image for a property
 class Photo(models.Model):
+    """
+    Represents an uploaded image for a property
+    """
     image = models.ImageField(null=True, blank=True, db_index=True)
     property = models.ForeignKey(Property, related_name='photos', on_delete=models.PROTECT)
     is_thumbnail = models.BooleanField(default=False)

@@ -199,3 +199,7 @@ IMAGE_MAX_SIZE = 2 * 1024 * 1024
 
 # Number of images allowed for a property
 PROPERTY_MAX_IMAGES = 20
+
+# Expiration interval of validation tokens in minutes
+VALIDATION_TOKEN_PHONE_EXPIRY = 3
+VALIDATION_TOKEN_EMAIL_EXPIRY = 12*60

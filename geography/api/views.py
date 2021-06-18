@@ -12,6 +12,9 @@ class CountryListAPIView(ListAPIView):
 
 
 class CityFilter(FilterSet):
+    """
+    FilterSet class to allow client to search cities based on country or partial names.
+    """
     title = CharFilter(field_name='title', lookup_expr='icontains')
 
     class Meta:

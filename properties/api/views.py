@@ -14,11 +14,13 @@ from rest_framework.filters import OrderingFilter
 from django.db.models import Count
 
 
-# Filter set class for searching in properties
-# it can filter based on property name(q), city,
-# create_date or the ones that have at least
-# one photo
 class PropertyFilter(FilterSet):
+    """
+    Filter set class for searching in properties
+    it can filter based on property name(q), city,
+    create_date or the ones that have at least
+    one photo
+    """
     q = CharFilter(field_name='name', lookup_expr='icontains')
     create_date = DateTimeFromToRangeFilter()
     has_photo = BooleanFilter(field_name='photos', method='filter_with_photos')
@@ -34,8 +36,10 @@ class PropertyFilter(FilterSet):
         fields = ['q', 'name', 'city', 'has_photo', 'create_date']
 
 
-# View class for listing, searching and creating properties.
 class PropertyListCreateAPIView(ListCreateAPIView):
+    """
+    View class for listing, searching and creating properties.
+    """
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = PropertyFilter
     ordering_fields = ['create_date']
@@ -44,12 +48,16 @@ class PropertyListCreateAPIView(ListCreateAPIView):
     serializer_class = PropertySerializer
     pagination_class = PropertyPagePagination
 
-    # Just show the properties that the user owns.
     def get_queryset(self):
+        """
+        Just show the properties that the user owns.
+        """
         return Property.objects.filter(user=self.request.user)
 
-    # Set the owner of the property before creating it.
     def perform_create(self, serializer):
+        """
+        Set the owner of the property before creating it.
+        """
         if serializer.is_valid():
             serializer.save(user=self.request.user)
 
@@ -60,15 +68,19 @@ class PropertyRetrieveUpdateAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Property.objects.all()
 
 
-# View for uploading and deleting property photos.
-# Also setting a photo as thumbnail.
 class MediaManagerAPIView(GenericAPIView):
+    """
+    View for uploading and deleting property photos.
+    Also setting a photo as thumbnail.
+    """
     permission_classes = [IsAuthenticated, IsPropertyOwner]
     serializer_class = PhotoSerializer
     parser_classes = (MultiPartParser,)
 
-    # Upload new property photo.
     def post(self, request, *args, **kwargs):
+        """
+        Upload new property photo.
+        """
         serializer = self.get_serializer(data=request.data)
         # First find the related property object, then check the user permission,
         # if all passes, then assign the new photo to the property
@@ -87,8 +99,10 @@ class MediaManagerAPIView(GenericAPIView):
             return Response(serializer_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Delete an existing photo of a property
     def delete(self, request, *args, **kwargs):
+        """
+        Delete an existing photo of a property
+        """
         filename = self.kwargs.get('filename')
         if not filename:
             return Response('filename not specified', status=status.HTTP_400_BAD_REQUEST)
@@ -113,8 +127,10 @@ class MediaManagerAPIView(GenericAPIView):
             return Response('deleted successfully', status=status.HTTP_200_OK)
         return Response('object not found', status=status.HTTP_404_NOT_FOUND)
 
-    # Sets the specified photo as thumbnail
     def put(self, request, *args, **kwargs):
+        """
+        Sets the specified photo as thumbnail
+        """
         filename = self.kwargs.get('filename')
         if not filename:
             return Response('Filename not specified.', status=status.HTTP_400_BAD_REQUEST)

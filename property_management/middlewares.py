@@ -2,9 +2,12 @@ from rest_framework_simplejwt import authentication
 from django.contrib.auth.models import AnonymousUser
 
 
-# Simple JWT does not fill 'request.user'. For easier access to user
-# information in the views, this middleware fills 'request.user'.
 class JWTMiddleware:
+    """
+    Simple JWT does not fill 'request.user'. For easier access to user
+    information in the views, this middleware fills 'request.user'.
+    """
+
     def __init__(self, get_response):
         self.get_response = get_response
 

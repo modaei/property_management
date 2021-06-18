@@ -15,9 +15,8 @@ from django.conf import settings
 from smtplib import SMTPException
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.dispatch import receiver
-from django.template.loader import render_to_string
-from django.core.mail import EmailMultiAlternatives
 from rest_framework_simplejwt.views import TokenObtainPairView
+from property_management.utils import send_mail
 
 User = get_user_model()
 
@@ -28,6 +27,9 @@ class RegisterAPIView(CreateAPIView):
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    API View for users to get their own account information, updating and deleting it.
+    """
     serializer_class = UserRetrieveUpdateSerializer
     permission_classes = [IsAuthenticated, IsUserInfoOwner, ]
 
@@ -37,6 +39,9 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateDestroyAPIView):
         return obj
 
     def perform_destroy(self, instance):
+        """
+        Instead of hard delete, the user is just set as inactive.
+        """
         instance.active = False
         instance.save()
 
@@ -51,6 +56,9 @@ class ChangePasswordView(UpdateAPIView):
         return obj
 
     def update(self, request, *args, **kwargs):
+        """
+        If the serializer is valid (old password, new password, ...), change user's password and send a 200 response.
+        """
         user_obj = self.get_object()
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -68,8 +76,10 @@ class ChangePasswordView(UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Validate user contact details by sending a token: Email or phone number
 class RequestValidationTokenView(UpdateAPIView):
+    """
+    Validate user contact details by sending a token: Email or phone number.
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = RequestValidationTokenSerializer
 
@@ -77,6 +87,20 @@ class RequestValidationTokenView(UpdateAPIView):
         return self.request.user
 
     def update(self, request, *args, **kwargs):
+        """
+        This method performs the actual token sending by the means of email or SMS.
+
+        If a token for the validation_type and for the requesting user already exists, first delete it.
+        If email verification is requested:
+            If email is already verified, return 400 error.
+            Otherwise create the token and try to email it.
+            If email is successfully sent, save the token in the DB and send 200 response.
+        If phone verification is requested:
+            If phone is already verified, return 400 error.
+            If user's phone number is null, return 400 error.
+            Otherwise create the token and try to send it by SMS.
+            If SMS is successfully sent, save the token in the DB and send 200 response.
+        """
         user_obj = self.get_object()
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -138,8 +162,11 @@ class RequestValidationTokenView(UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Check the contact details token. If token is valid email_verified or phone_verified will be true
 class ConfirmValidationTokenView(UpdateAPIView):
+    """
+    This view receives a validation token. If the token is valid and not expired,
+    it will set email_verified or phone_verified property of a user to True.
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = ValidateValidationTokenSerializer
 
@@ -167,11 +194,18 @@ class ConfirmValidationTokenView(UpdateAPIView):
 
 
 class JWTokenObtainPairView(TokenObtainPairView):
+    """
+    Simple JWT view for issuing JWT authentication and refresh tokens.
+    """
     serializer_class = JWTokenPairSerializer
 
 
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
+    """
+    This receiver catches the django_rest_passwordreset's signal when a password reset token is created.
+    It sends the reset password email to the user.
+    """
     context = {
         'full_name': reset_password_token.user.full_name,
         'reset_password_url': f'{settings.RESET_PASSWORD_URL}{reset_password_token.key}',
@@ -186,18 +220,4 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
                         status=status.HTTP_404_NOT_FOUND)
 
 
-def send_mail(context, template):
-    email_html_message = render_to_string(template + '.html', context)
-    email_plaintext_message = render_to_string(template + '.txt', context)
-    msg = EmailMultiAlternatives(
-        # title:
-        context['title'],
-        # message:
-        email_plaintext_message,
-        # from:
-        f'noreply@{settings.SITE_DOMAIN}',
-        # to:
-        [context['to']]
-    )
-    msg.attach_alternative(email_html_message, "text/html")
-    msg.send(fail_silently=False)
+
