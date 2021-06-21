@@ -76,40 +76,40 @@ class User(AbstractBaseUser):
         super(User, self).save(*args, **kwargs)
 
 
-def has_perm(self, perm, obj=None):
-    return True
+    def has_perm(self, perm, obj=None):
+        return True
 
 
-def has_module_perms(self, app_label):
-    return True
+    def has_module_perms(self, app_label):
+        return True
 
 
-@property
-def short_name(self):
-    return self.first_name
+    @property
+    def short_name(self):
+        return self.first_name
 
 
-@property
-def full_name(self):
-    if self.first_name or self.last_name:
-        return f'{self.first_name} {self.last_name}'
-    else:
-        return None
+    @property
+    def full_name(self):
+        if self.first_name or self.last_name:
+            return f'{self.first_name} {self.last_name}'
+        else:
+            return None
 
 
-@property
-def is_active(self):
-    return self.active
+    @property
+    def is_active(self):
+        return self.active
 
 
-@property
-def is_staff(self):
-    return self.staff
+    @property
+    def is_staff(self):
+        return self.staff
 
 
-@property
-def is_admin(self):
-    return self.admin
+    @property
+    def is_admin(self):
+        return self.admin
 
 
 class ValidationToken(models.Model):
