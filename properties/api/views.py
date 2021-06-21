@@ -7,7 +7,7 @@ from ..models import Property, Photo
 from rest_framework import status
 from .permissions import IsPropertyOwner
 from django.core.files.storage import default_storage
-from .paginations import PropertyPagePagination
+from property_management.paginations import PagePagination
 from django_filters.rest_framework import (DjangoFilterBackend, FilterSet, BooleanFilter, DateTimeFromToRangeFilter,
                                            CharFilter)
 from rest_framework.filters import OrderingFilter
@@ -46,7 +46,7 @@ class PropertyListCreateAPIView(ListCreateAPIView):
     ordering = ['-create_date']
     permission_classes = [IsAuthenticated]
     serializer_class = PropertySerializer
-    pagination_class = PropertyPagePagination
+    pagination_class = PagePagination
 
     def get_queryset(self):
         """

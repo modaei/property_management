@@ -2,7 +2,7 @@ from .views import (PropertyListCreateAPIView, PropertyRetrieveUpdateAPIView, Me
 
 from django.urls import path
 
-app_name = 'property-api'
+app_name = 'properties-api'
 
 urlpatterns = [
     path('', PropertyListCreateAPIView.as_view(), name="property_list_create"),

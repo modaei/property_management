@@ -1,12 +1,12 @@
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 
 
-class PropertyPagePagination(PageNumberPagination):
+class PagePagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 40
 
 
-class PropertyOffsetPagination(LimitOffsetPagination):
+class OffsetPagination(LimitOffsetPagination):
     default_limit = 10
     max_limit = 40
