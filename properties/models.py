@@ -9,7 +9,7 @@ class Property(models.Model):
     """
     Represents a real estate property.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, on_delete=models.PROTECT)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, on_delete=models.PROTECT)
     city = models.ForeignKey(City, blank=True, null=True, on_delete=models.PROTECT)
     name = models.CharField(blank=False, null=False, max_length=30, db_index=True)
     description = models.TextField(blank=True, null=True, max_length=1000)

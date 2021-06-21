@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from .validators import validate_phone_number, validate_names
+from property_management.validators import validate_phone_number, validate_names
 from django.conf import settings
 
 
