@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from properties.models import Property
-from accounts.validators import validate_names, validate_phone_number
+from property_management.validators import validate_names, validate_phone_number
 
 
 class Tenant(models.Model):
