@@ -52,14 +52,14 @@ class PropertyListCreateAPIView(ListCreateAPIView):
         """
         Just show the properties that the user owns.
         """
-        return Property.objects.filter(user=self.request.user)
+        return Property.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
         """
         Set the owner of the property before creating it.
         """
         if serializer.is_valid():
-            serializer.save(user=self.request.user)
+            serializer.save(owner=self.request.user)
 
 
 class PropertyRetrieveUpdateAPIView(RetrieveUpdateDestroyAPIView):
