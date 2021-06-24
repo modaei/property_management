@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'accounts',
     'geography',
     'properties',
+    'rents'
 ]
 
 MIDDLEWARE = [
@@ -101,7 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
     {
-        'NAME': 'accounts.validators.DifferentPasswordValidator',
+        'NAME': 'property_management.validators.DifferentPasswordValidator',
     },
 ]
 
@@ -146,8 +147,9 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    # TODO: should be decreased in production
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=50),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
@@ -202,4 +204,4 @@ PROPERTY_MAX_IMAGES = 20
 
 # Expiration interval of validation tokens in minutes
 VALIDATION_TOKEN_PHONE_EXPIRY = 3
-VALIDATION_TOKEN_EMAIL_EXPIRY = 12*60
+VALIDATION_TOKEN_EMAIL_EXPIRY = 12 * 60

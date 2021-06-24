@@ -18,4 +18,7 @@ urlpatterns = [
 
     # APIs for managing properties
     path('api/properties/', include('properties.api.urls')),
+
+    # APIs for managing rental contracts and tenants
+    path('api/rents/', include('rents.api.urls')),
 ]
