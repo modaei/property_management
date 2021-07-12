@@ -15,11 +15,11 @@ class CityFilter(FilterSet):
     """
     FilterSet class to allow client to search cities based on country or partial names.
     """
-    title = CharFilter(field_name='title', lookup_expr='icontains')
+    name = CharFilter(field_name='name', lookup_expr='icontains')
 
     class Meta:
         model = City
-        fields = ['country', 'title']
+        fields = ['country', 'name']
 
 
 class CityListAPIView(ListAPIView):
