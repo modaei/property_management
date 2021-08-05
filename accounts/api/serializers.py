@@ -1,7 +1,11 @@
 from django.contrib.auth import get_user_model
-from rest_framework.serializers import ModelSerializer, EmailField, ValidationError, Serializer, CharField
+from geoip2.errors import AddressNotFoundError
+from rest_framework.serializers import ModelSerializer, EmailField, ValidationError, Serializer, CharField, \
+    SerializerMethodField
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.gis.geoip2 import GeoIP2
+from geography.models import Country, City
 
 User = get_user_model()
 
@@ -43,14 +47,58 @@ class UserCreateSerializer(ModelSerializer):
         return validated_data
 
 
+def get_country_id_from_ip(ip):
+    try:
+        country_code = GeoIP2().country_code(ip)
+        country_id = Country.objects.filter(code=country_code).first().id
+    except (AddressNotFoundError, AttributeError):
+        country_id = Country.objects.filter(code='US').first().id
+    return country_id
+
+
+def get_city_id_from_ip(ip):
+    try:
+        city_name = GeoIP2().city(ip)
+        city_id = City.objects.filter(name=city_name).filter(country_id=get_country_id_from_ip(ip)).first().id
+    except (AddressNotFoundError, AttributeError):
+        city_id = None
+    return city_id
+
+
 class UserRetrieveUpdateSerializer(ModelSerializer):
     """
     Serializer for retrieving and updating user account info
     """
+    country = SerializerMethodField()
+    city = SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'email_verified', 'phone_number_verified']
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'email_verified', 'phone_number_verified',
+                  'default_country', 'country', 'city']
         read_only_fields = ['id', 'email', 'email_verified', 'phone_number_verified']
+
+    def get_country(self, obj):
+        if obj.default_country:
+            return obj.default_country.id
+
+        ip = self.get_ip()
+        return get_country_id_from_ip(ip)
+
+    def get_city(self, obj):
+        if obj.default_city:
+            return obj.default_city.id
+
+        ip = self.get_ip()
+        return get_city_id_from_ip(ip)
+
+    def get_ip(self):
+        x_forwarded_for = self.context.get('request').META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = self.context.get('request').META.get('REMOTE_ADDR')
+        return ip
 
 
 class ChangePasswordSerializer(Serializer):
@@ -103,6 +151,7 @@ class JWTokenPairSerializer(TokenObtainPairSerializer):
     Override default simple_JWT's token generator to add user basic info to
     the token over head.
     """
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)

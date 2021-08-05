@@ -4,7 +4,6 @@ from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 
 
-
 class BlankableIntegerField(IntegerField):
     """
     This field is able to receive an empty string for an integer field and turn it into a None number.

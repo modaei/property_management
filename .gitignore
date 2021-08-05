@@ -4,3 +4,5 @@ __pycache__/
 *.docx
 .idea/
 docs/
+/GeoLite/
+/protected/

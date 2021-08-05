@@ -4,12 +4,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from property_management.validators import validate_phone_number, validate_names
 from django.conf import settings
+from geography.models import Country, City
 
 
 class UserManager(BaseUserManager):
     """
     Manager class for the custom User class.
     """
+
     def create_user(self, email, phone_number, password=None, is_active=True, is_staff=False,
                     is_admin=False):
         user_obj = self.model(
@@ -58,6 +60,8 @@ class User(AbstractBaseUser):
     phone_number = models.CharField(unique=True, blank=True, null=True, max_length=20,
                                     validators=[validate_phone_number])
     phone_number_verified = models.BooleanField(blank=False, null=False, default=False)
+    default_country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.SET_NULL)
+    default_city = models.ForeignKey(City, null=True, blank=True, on_delete=models.SET_NULL)
 
     USERNAME_FIELD = 'email'
     objects = UserManager()
@@ -65,7 +69,6 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
 
-    #
     def save(self, *args, **kwargs):
         """
         If user's phone number is changed, it will not be verified anymore.
@@ -75,19 +78,15 @@ class User(AbstractBaseUser):
             self.phone_number_verified = False
         super(User, self).save(*args, **kwargs)
 
-
     def has_perm(self, perm, obj=None):
         return True
-
 
     def has_module_perms(self, app_label):
         return True
 
-
     @property
     def short_name(self):
         return self.first_name
-
 
     @property
     def full_name(self):
@@ -96,16 +95,13 @@ class User(AbstractBaseUser):
         else:
             return None
 
-
     @property
     def is_active(self):
         return self.active
 
-
     @property
     def is_staff(self):
         return self.staff
-
 
     @property
     def is_admin(self):

@@ -205,3 +205,5 @@ PROPERTY_MAX_IMAGES = 20
 # Expiration interval of validation tokens in minutes
 VALIDATION_TOKEN_PHONE_EXPIRY = 3
 VALIDATION_TOKEN_EMAIL_EXPIRY = 12 * 60
+
+GEOIP_PATH = os.path.join(BASE_DIR, 'GeoLite/')
