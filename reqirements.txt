@@ -1,7 +1,11 @@
+aiohttp==3.7.4.post0
 asgiref==3.3.1
+async-timeout==3.0.1
+attrs==21.2.0
 autopep8==1.5.7
 cachetools==4.2.2
 certifi==2021.5.30
+chardet==4.0.0
 charset-normalizer==2.0.4
 Django==3.1.5
 django-cors-headers==3.6.0
@@ -11,9 +15,12 @@ django-rest-passwordreset==1.1.0
 djangorestframework==3.12.2
 djangorestframework-simplejwt==4.6.0
 easy-thumbnails==2.7.1
+geoip2==4.2.0
 idna==3.2
 ipinfo==3.0.0
 ipinfo-django==1.1.0
+maxminddb==2.0.3
+multidict==5.1.0
 mysqlclient==2.0.3
 Pillow==8.1.0
 pycodestyle==2.7.0
@@ -23,4 +30,6 @@ requests==2.26.0
 six==1.16.0
 sqlparse==0.4.1
 toml==0.10.2
+typing-extensions==3.10.0.0
 urllib3==1.26.6
+yarl==1.6.3
