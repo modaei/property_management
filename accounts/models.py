@@ -61,7 +61,6 @@ class User(AbstractBaseUser):
                                     validators=[validate_phone_number])
     phone_number_verified = models.BooleanField(blank=False, null=False, default=False)
     default_country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.SET_NULL)
-    default_city = models.ForeignKey(City, null=True, blank=True, on_delete=models.SET_NULL)
 
     USERNAME_FIELD = 'email'
     objects = UserManager()

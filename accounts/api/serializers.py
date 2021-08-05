@@ -5,7 +5,7 @@ from rest_framework.serializers import ModelSerializer, EmailField, ValidationEr
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.gis.geoip2 import GeoIP2
-from geography.models import Country, City
+from geography.models import Country
 
 User = get_user_model()
 
@@ -47,6 +47,15 @@ class UserCreateSerializer(ModelSerializer):
         return validated_data
 
 
+def get_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
 def get_country_id_from_ip(ip):
     try:
         country_code = GeoIP2().country_code(ip)
@@ -56,49 +65,24 @@ def get_country_id_from_ip(ip):
     return country_id
 
 
-def get_city_id_from_ip(ip):
-    try:
-        city_name = GeoIP2().city(ip)
-        city_id = City.objects.filter(name=city_name).filter(country_id=get_country_id_from_ip(ip)).first().id
-    except (AddressNotFoundError, AttributeError):
-        city_id = None
-    return city_id
-
-
 class UserRetrieveUpdateSerializer(ModelSerializer):
     """
     Serializer for retrieving and updating user account info
     """
     country = SerializerMethodField()
-    city = SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'email_verified', 'phone_number_verified',
-                  'default_country', 'country', 'city']
+                  'default_country', 'country', ]
         read_only_fields = ['id', 'email', 'email_verified', 'phone_number_verified']
 
     def get_country(self, obj):
         if obj.default_country:
             return obj.default_country.id
 
-        ip = self.get_ip()
+        ip = get_ip(self.context.get('request'))
         return get_country_id_from_ip(ip)
-
-    def get_city(self, obj):
-        if obj.default_city:
-            return obj.default_city.id
-
-        ip = self.get_ip()
-        return get_city_id_from_ip(ip)
-
-    def get_ip(self):
-        x_forwarded_for = self.context.get('request').META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = self.context.get('request').META.get('REMOTE_ADDR')
-        return ip
 
 
 class ChangePasswordSerializer(Serializer):
