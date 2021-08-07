@@ -11,7 +11,7 @@ class IsPropertyOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
-        return obj.user == request.user
+        return obj.owner == request.user
 
 
 class IsPropertyOwner(BasePermission):
@@ -22,4 +22,4 @@ class IsPropertyOwner(BasePermission):
     message = "Only the owner can edit/delete this object"
 
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        return obj.owner == request.user
